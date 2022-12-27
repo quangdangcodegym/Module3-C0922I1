@@ -111,5 +111,49 @@ from bomon bm JOIN giaovien gv on gv.MABM=bm.MABM;
 select *
 from bomon bm, giaovien gv
 where gv.MABM=bm.MABM;
+
+drop spTinhLuongTBTheoBM if exists
+delimiter //
+create procedure spTinhLuongTBTheoBM(
+	IN pTenBM varchar(20)
+)
+BEGIN
+		select avg(LUONG) as luong
+		from giaovien
+		where MABM  = pTenBM
+		group by MABM;
+END //;
+
+drop spTinhLuongTBTheoBM1 if exists
+delimiter //
+create procedure spTinhLuongTBTheoBM1(
+	IN pMaBM varchar(20),
+    OUT pMessage varchar(200)
+)
+BEGIN
+	if(exists (select * from bomon where MABM = pMaBM)) then
+		select avg(LUONG) as luong
+		from giaovien
+		where MABM  = pMaBM
+		group by MABM;
+	else
+		set pMessage = 'ID khong ton tai';
+	end if;
+        
+END //
+
+
+-- Q78. Xóa các đề tài thuộc chủ đề “NCPT”.
 			
+-- Xuất ra thông tin của giáo viên (MAGV, HOTEN) và mức lương của giáo viên. 
+-- Mức lương được xếp theo,quy tắc: Lương của giáo viên < $1800 : “THẤP” ; 
+-- Từ $1800 đến $2200: TRUNG BÌNH; Lương > $2200:“CAO”
+use c9_quanlydetai;
+select *, CASE
+    WHEN LUONG < 1800 THEN "THẤP"
+    WHEN LUONG > 1800 and LUONG < 2200 THEN "TRUNG BÌNH"
+    ELSE "CAO"
+END
+from giaovien;
+
 
