@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .head{
+            display: flex;
+            justify-content: space-between;
+        }
+        ul{
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+        ul.menu{
+        
+            display: flex;
+        }
+        .head a{
+            text-decoration: none;
+        }
+        ul>li{
+            padding: 10px;
+        }
+        ul.menu-item{
+            position: absolute;
+            top: 100%;
+            left: 0;
+            display: none;
+        }
+        ul.menu > li{
+            position: relative;
+        }
+        ul{
+            min-width: 200px;
+        }
+        ul.menu > li{
+            background-color: gainsboro;
+        }
+        ul.menu-item > li{
+            background-color: aquamarine;
+        }
+        ul > li:hover{
+            background-color: red;
+        }
+        ul.menu li:hover > ul{
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="head">
+        <div class="menu-left">
+            <ul class="menu">
+                <li><a href="">Trang chủ</a></li>
+                <li>
+                    <a href="">Sản phẩm</a>
+                    <ul class="menu-item">
+                        <li><a href="">Iphone X</a></li>
+                        <li><a href="">Iphone 11</a></li>
+                        <li><a href="">Iphone 12</a></li>
+                    </ul>
+                </li>
+                <li><a href="">Liên hệ</a></li>
+            </ul>
+        </div>
+        <div class="menu-right">
+            <ul class="menu">
+                <li><a href="">Trang chủ</a></li>
+                <li>
+                    <a href="">Sản phẩm</a>
+                    <ul class="menu-item">
+                        <li><a href="">Iphone X</a></li>
+                        <li><a href="">Iphone 11</a></li>
+                        <li><a href="">Iphone 12</a></li>
+                    </ul>
+                </li>
+                <li><a href="">Liên hệ</a></li>
+            </ul>
+        </div>
+        
+    </div>
+</body>
+</html>
