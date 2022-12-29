@@ -152,8 +152,125 @@ use c9_quanlydetai;
 select *, CASE
     WHEN LUONG < 1800 THEN "THẤP"
     WHEN LUONG > 1800 and LUONG < 2200 THEN "TRUNG BÌNH"
-    ELSE "CAO"
-END
+    ELSE "CAO" 
+END as thuhang
 from giaovien;
+
+/**
+Q81. Xuất ra thông tin thu nhập của giáo viên. Thu nhập của giáo viên được tính bằng LƯƠNG + PHỤ CẤP. 
+Nếu giáo viên là trưởng bộ môn thì PHỤ CẤP là 300, và giáo viên là trưởng khoa thì PHỤ CẤP là 600.
+**/
+SELECT MAGV,LUONG, (LUONG + if( exists (SELECT * FROM bomon where TRUONGBM = gv.MAGV), 300, 0)
+							+if( exists (SELECT * FROM khoa where TRUONGKHOA = gv.MAGV), 600, 0)
+					)  as phucap
+FROM giaovien gv;
+
+SELECT GV.MAGV, GV.HOTEN,LUONG,
+       CASE
+           WHEN (K.TRUONGKHOA IS NOT NULL AND B.TRUONGBM IS NOT NULL) THEN (LUONG +900)
+           WHEN K.TRUONGKHOA IS NOT NULL THEN (LUONG + 600)
+           WHEN B.TRUONGBM IS NOT NULL THEN (LUONG+300)
+           ELSE (LUONG)
+END AS THUNHAP
+FROM GIAOVIEN GV
+LEFT JOIN KHOA K ON GV.MAGV = K.TRUONGKHOA
+LEFT JOIN BOMON B on GV.MAGV=B.TRUONGBM;
+
+/**
+Q82. Xuất ra năm mà giáo viên dự kiến sẽ nghĩ hưu với quy định: Tuổi nghỉ hưu của Nam là 60, của Nữ là 55.
+**/
+
+select *, CASE
+    WHEN PHAI = 'Nam' THEN year(DATE_ADD(NGSINH, INTERVAL 60 YEAR))
+    WHEN PHAI = 'Nữ' THEN year(DATE_ADD(NGSINH, INTERVAL 55 YEAR))
+END as namvehuu
+from giaovien;
+
+SELECT GV.HOTEN,
+       GV.NGSINH,
+       CASE
+           WHEN GV.PHAI = 'Nam' THEN YEAR(NOW()) + 60 - (year(NOW()) - YEAR(GV.NGSINH))
+           WHEN GV.PHAI = 'Nữ' THEN YEAR(NOW()) + 55 - (YEAR(NOW()) - YEAR(GV.NGSINH))
+           END AS NAMNGHIHUU
+FROM GIAOVIEN GV;
+
+
+/**
+Q80. Xuất ra thông tin giáo viên (MAGV, HOTEN) và xếp hạng dựa vào mức lương. Nếu giáo viên có lương cao
+nhất thì hạng là 1.
+**/
+CREATE DEFINER=`root`@`localhost` PROCEDURE `spThuHangLuongGiaoVien`()
+BEGIN
+	SET @rank=0;
+    select *
+    from giaovien gv1 join (select *, @rank:=@rank+1 AS hang
+							from (	select distinct LUONG
+									from giaovien
+									order by LUONG DESC) as t
+							) as temp on gv1.LUONG = temp.LUONG order by temp.hang;
+END
+
+SELECT MAGV,
+       HOTEN,
+       LUONG,
+       DENSE_RANK()  OVER (ORDER BY LUONG DESC ) LUONG_RANK
+FROM giaovien;
+
+
+-- Viết procedure thực hiện các chức năng:
+# Câu 1: Hoàn thiện thêm giáo viên
+#  + Truyền vào: HOTEN,LUONG,PHAI,NGSINH,GVQLCM, MABM
+#  + Không cần truyền mã giáo viên, tự động sinh mã giáo viên mới và thêm vào.
+#  Thêm thành công thì trả ra MAGV mới, không thêm được thì trả MAGV mới = NULL. Đổi lại dùng tham số INOUT
+#  + Kiểm tra tồn tại MABM trước khi thêm
+-- Lấy id cuối cùng +1
+DELIMITER //
+DROP PROCEDURE IF EXISTS getLastId;
+CREATE PROCEDURE getLastId(OUT id char(3))
+BEGIN
+    -- SELECT CAST(GV.MAGV AS DECIMAL) + 1 INTO id FROM (SELECT MAGV FROM GIAOVIEN ORDER BY MAGV DESC LIMIT 1) AS GV;
+    declare maxId integer;
+    
+    set id = (SELECT CAST(GV.MAGV AS DECIMAL) + 1 FROM (SELECT MAGV FROM GIAOVIEN ORDER BY MAGV DESC LIMIT 1) AS GV);
+	if(id <10) then
+		set id = concat('00', id);
+	else
+		if(id <100) then
+			set id = concat('0', id);
+        end if;
+    end if;
+end //
+DELIMITER ;
+-- Procedure thêm giáo viên.
+DELIMITER //
+DROP PROCEDURE IF EXISTS addNewTeacher;
+CREATE PROCEDURE addNewTeacher(
+			tHOTEN VARCHAR(50), tLUONG DECIMAL(10, 1), tPHAI VARCHAR(3), tNGSINH DATE,
+			tGVQLCM VARCHAR(3), tMABM VARCHAR(4), 
+            OUT tMAGV VARCHAR(3))
+BEGIN
+	-- declare biến: khai báo biến
+    -- gán giá trị: set 
+    -- gán giá trị cho biến 
+    IF (EXISTS(SELECT BM.MABM
+               FROM BOMON bm
+               WHERE bm.MABM = tMABM)) THEN
+               
+		 set @MaGV = '';
+        call getLastId(@MaGV);
+        INSERT INTO GIAOVIEN (MAGV,HOTEN, LUONG, PHAI, NGSINH, GVQLCM, MABM)
+        VALUES (@MaGV,tHOTEN, tLUONG, tPHAI, tNGSINH, tGVQLCM, tMABM);
+        set tMAGV = @MaGV;
+    ELSE
+        -- SELECT NULL INTO tMAGV;
+        set tMAGV = null;
+    END IF;
+end //
+
+set @tMAGV = '';
+CALL addNewTeacher('Đặng Văn Quang12', 2500, 'Nam', '1993-05-12', null, 'HPT', @tMAGV);
+SELECT @tMAGV;
+
+
 
 
