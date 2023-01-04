@@ -1,3 +1,4 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,7 +102,12 @@
             <div class="col-sm-8 main-center row justify-content-center">
                 <div class="login col-8">
                     <h1>Create Customer</h1>
-                    <form method="post">
+                    <c:if test="${requestScope.message!=null}">
+                        <div class="alert alert-primary">
+                            ${requestScope.message}
+                        </div>
+                    </c:if>
+                    <form method="post" >
                         <div class="row mb-2">
                             <div class="col-3">
                                 <label for="idTxtFullName">FullName</label>
