@@ -38,9 +38,9 @@ public class CustomerService {
     }
 
     public void deleteCustomerById(long id) {
-        for (Customer c : customers) {
-            if (c.getId() == id) {
-                customers.remove(c);
+        for (int i = 0; i < customers.size(); i++) {
+            if (customers.get(i).getId() == id) {
+                customers.remove(i);
             }
         }
     }

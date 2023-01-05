@@ -1,0 +1,31 @@
+Đầu tiên nhớ thêm thư viên
+    + bootstrap
+    + jquery
+    + bootstrap.js
+Show modal
+    + Tìm và đăng kí sự kiện cho các icon xóa
+    + Lấy giá trị id, name rồi cập nhật cho modal
+    + Đặt sự kiên cho nút delete
+        + Gọi form submit
+        + Trên server đọc thông tin ở method POST
+window.onload = ()=>{
+            let items = document.querySelectorAll("[id*=deleteId]");
+            console.log(items);
+            items.forEach((item)=>{
+                item.addEventListener("click", (event)=>{
+                    let id = event.target.parentElement.getAttribute('data-id');
+                    let name = event.target.parentElement.getAttribute('data-name');
+                    // let strId = event.target.parentElement.id;
+                    document.getElementById("idFrmDeleteConfirm").value = id;
+                    document.getElementById("nameFrmDeleteConfirm").innerText = name;
+
+                    $("#frmDeleteConfirm").modal();
+
+                });
+            })
+        }
+
+<button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="handleDeleteCustomer()">Delete</button>
+function handleDeleteCustomer(){
+            document.getElementById("frmDelete").submit();
+        }

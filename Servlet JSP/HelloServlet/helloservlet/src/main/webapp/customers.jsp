@@ -1,6 +1,8 @@
 <%@ page import="com.codegym.Customer" %>
 <%@ page import="java.util.List" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix = "fmt" uri = "http://java.sun.com/jsp/jstl/fmt" %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +12,9 @@
     <title>Document</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" >
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         .menu ul{
             list-style: none;
@@ -111,7 +116,38 @@
             <div class="col-sm-8 main-center row justify-content-center">
                 <div class="customers table-responsive">
                     <h2>List Customer</h2>
-                    <div class="alert alert-success">Insert success......</div>
+                    <div class="toast" data-autohide="true" style="position: fixed; top: 10px; right: 10px;">
+                        <div class="toast-header">
+                            <strong class="mr-auto text-primary">Edit customer</strong>
+                            <small class="text-muted">5 mins ago</small>
+                            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
+                        </div>
+                        <div class="toast-body">
+                            Edit success....ahii
+                        </div>
+                    </div>
+                    <div id="frmDeleteConfirm" class="modal fade" role="dialog">
+                        <div class="modal-dialog">
+
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <form action="/customers?action=delete" method="post" id="frmDelete">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Confirm Delete</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="hidden" id="idFrmDeleteConfirm" name="idFrmDeleteConfirm"  />
+                                        <p id="nameFrmDeleteConfirm">Name....?</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="handleDeleteCustomer()">Delete</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
                     <table class="table table-striped ">
                         <thead class="thead-dark">
                             <tr>
@@ -129,34 +165,17 @@
                             <td>${customer.getId()}</td>
                             <td>${customer.getName()}</td>
                             <td>${customer.getAddress()}</td>
-                            <td>${customer.getImage()}</td>
+                            <td><img width="100px" height="100px" src="${customer.getImage()}" /></td>
                             <td>${customer.getIdType()}</td>
-                            <td>${customer.getDateOfBirth()}</td>
+                            <td><fmt:formatDate pattern = "yyyy-MM-dd"
+                                                value = "${customer.getDateOfBirth()}" /></td>
 
-                            <td><i class="fa-solid fa-user-plus"></i><i class="fa-solid fa-trash"></i></td>
+                            <td>
+                                <a href="/customers?action=edit&id=${customer.getId()}"><i class="fa-solid fa-user-plus"></i></a>
+                                <a id="deleteId${customer.getId()}" data-id="${customer.getId()}" data-name="${customer.getName()}"><i class="fa-solid fa-trash"></i></a>
+                            </td>
                             </tr>
                         </c:forEach>
-                        <!--
-                        List<Customer> customers = (List<Customer>) request.getAttribute("listCustomer");
-                            String str = "";
-                            for (int i = 0; i < customers.size(); i++) {
-                                Customer c = customers.get(i);
-                                String temp = String.format("<tr>\n" +
-                                        "                            <td>%s</td>\n" +
-                                        "                            <td>%s</td>\n" +
-                                        "                            <td>%s</td>\n" +
-                                        "                            <td>%s</td>\n" +
-                                        "                            <td>%s</td>\n" +
-                                        "                            <td>%s</td>\n" +
-                                        "                            <td><i class=\"fa-solid fa-user-plus\"></i><i class=\"fa-solid fa-trash\"></i></td>\n" +
-                                        "                        </tr>", c.getId(), c.getName(), c.getDateOfBirth(), c.getImage(), c.getAddress(), c.getIdType());
-                                str += temp;
-                            }
-
-                            out.println(str);
-                        -->
-
-
                     </table>
                     <nav aria-label="Page navigation example" class="row justify-content-end mr-1">
                         <ul class="pagination">
@@ -180,5 +199,39 @@
             </div>
         </div>
     </div>
+    <c:if test="${requestScope.message!=null}">
+        <script>
+            $(document).ready(function(){
+                let message = '<%= request.getAttribute("message")%>';
+                document.querySelector(".toast-body").innerText = message;
+
+                $('.toast').toast({delay: 5000});
+                $('.toast').toast('show');
+
+            });
+        </script>
+    </c:if>
+    <script>
+
+        window.onload = ()=>{
+            let items = document.querySelectorAll("[id*=deleteId]");
+            console.log(items);
+            items.forEach((item)=>{
+                item.addEventListener("click", (event)=>{
+                    let id = event.target.parentElement.getAttribute('data-id');
+                    let name = event.target.parentElement.getAttribute('data-name');
+                    // let strId = event.target.parentElement.id;
+                    document.getElementById("idFrmDeleteConfirm").value = id;
+                    document.getElementById("nameFrmDeleteConfirm").innerText = name;
+
+                    $("#frmDeleteConfirm").modal();
+
+                });
+            })
+        }
+        function handleDeleteCustomer(){
+            document.getElementById("frmDelete").submit();
+        }
+    </script>
 </body>
 </html>

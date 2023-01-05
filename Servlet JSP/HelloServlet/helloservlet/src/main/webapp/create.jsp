@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix = "fmt" uri = "http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -107,13 +108,29 @@
                             ${requestScope.message}
                         </div>
                     </c:if>
+
+<%--                    <h1>${requestScope.errors}</h1>--%>
+<%--                    <h1>${requestScope.errors.toString()}</h1>--%>
+<%--                    <h1>${requestScope.errors.size()}</h1>--%>
+<%--                    <h1>${requestScope.errors.isEmpty()}</h1>--%>
+
+<%--                    <c:if test="${requestScope.errors.isEmpty() == false} ">--%>
+                    <c:if test="${requestScope.errors.isEmpty() == false}">
+                         <div class="alert alert-danger">
+                            <ul>
+                                <c:forEach items="${requestScope.errors}" var="error">
+                                    <li>${error}</li>
+                                </c:forEach>
+                            </ul>
+                         </div>
+                    </c:if>
                     <form method="post" >
                         <div class="row mb-2">
                             <div class="col-3">
                                 <label for="idTxtFullName">FullName</label>
                             </div>
                             <div class="col-9">
-                                <input type="text" id="idTxtFullName" name="txtFullName" class="form-control" placeholder="full name">
+                                <input type="text" id="idTxtFullName" name="txtFullName" class="form-control" placeholder="full name" value="${requestScope.customer.getName()}">
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -121,7 +138,8 @@
                                 <label for="idDateOfBirth">Date of birth</label>
                             </div>
                             <div class="col-9">
-                                <input type="date" id="idDateOfBirth" name="txtDateOfBirth"  class="form-control" >
+                                <input type="date" id="idDateOfBirth" value="<fmt:formatDate pattern = "yyyy-MM-dd"
+         value = "${requestScope.customer.getDateOfBirth()}" />" name="txtDateOfBirth"  class="form-control" >
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -129,7 +147,7 @@
                                 <label for="idAddress">Address</label>
                             </div>
                             <div class="col-9">
-                                <input type="text" id="idAddress" name="txtAddress"  class="form-control" >
+                                <input type="text" id="idAddress" name="txtAddress" value="${requestScope.customer.getAddress()}"  class="form-control" >
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -137,7 +155,7 @@
                                 <label for="idImage">Image</label>
                             </div>
                             <div class="col-9">
-                                <input type="text" id="idImage" name="txtImage"  class="form-control" >
+                                <input type="text" id="idImage" value="${requestScope.customer.getImage()}" name="txtImage"  class="form-control" >
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -145,7 +163,7 @@
                                 <label for="idType">Type Customer</label>
                             </div>
                             <div class="col-9">
-                                <input type="number" id="idType" name="txtIdType"  class="form-control" >
+                                <input type="number" id="idType" value="${requestScope.customer.getIdType()}" name="txtIdType"  class="form-control" >
                             </div>
                         </div>
                         <div class="row">

@@ -106,7 +106,7 @@
     <div class="col-sm-8 main-center row justify-content-center">
       <div class="login col-8">
         <h1>Edit Customer</h1>
-        <div class="toast" data-autohide="false" style="position: fixed; top: 10px; right: 10px;">
+        <div class="toast" data-autohide="true" style="position: fixed; top: 10px; right: 10px;">
           <div class="toast-header">
             <strong class="mr-auto text-primary">Edit customer</strong>
             <small class="text-muted">5 mins ago</small>
@@ -181,13 +181,14 @@
 </div>
 <c:if test="${requestScope.message!=null}">
     <script>
-      window.onload = ()=>{
-          let message = '<%= request.getAttribute("message")%>';
-          document.querySelector(".toast-body").innerText = message;
+      $(document).ready(function(){
+        let message = '<%= request.getAttribute("message")%>';
+        document.querySelector(".toast-body").innerText = message;
 
         $('.toast').toast({delay: 5000});
         $('.toast').toast('show');
-      }
+
+      });
     </script>
 </c:if>
 <script>

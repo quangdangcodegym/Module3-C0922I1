@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.SimpleFormatter;
@@ -37,6 +38,7 @@ public class CustomerServlet extends HttpServlet {
             case "edit":
                 showEditCustomer(req, resp);
                 break;
+
             default:
                 showCustomers(req, resp);
         }
@@ -78,9 +80,27 @@ public class CustomerServlet extends HttpServlet {
             case "edit":
                 editCustomer(req, resp);
                 break;
+            case "delete":
+                deleteCustomer(req, resp);
+                break;
             default:
 
         }
+    }
+
+    private void deleteCustomer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        long id = Long.parseLong(req.getParameter("idFrmDeleteConfirm"));
+        Customer customer = customerService.findById(id);
+        if (customer != null) {
+            // Xóa
+            customerService.deleteCustomerById(id);
+            req.setAttribute("message", "Delete success!");
+        }else{
+            req.setAttribute("message", "Customer not exists");
+        }
+
+        showCustomers(req, resp);
+
     }
 
     private void editCustomer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -116,33 +136,75 @@ public class CustomerServlet extends HttpServlet {
     }
 
     private void insertCustomer(HttpServletRequest req, HttpServletResponse resp) throws  ServletException, IOException {
-        String fullName = req.getParameter("txtFullName");
-
-        String pattern = "yyyy-MM-dd";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-
-
-        Date dateOfBirth = null;
-        try {
-            dateOfBirth = simpleDateFormat.parse(req.getParameter("txtDateOfBirth"));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-        String address = req.getParameter("txtAddress");
-        String image = req.getParameter("txtImage");
-        int idType = Integer.parseInt(req.getParameter("txtIdType"));
-
+        List<String> errors = new ArrayList<>();
         Customer customer = new Customer();
-        customer.setImage(image);
-        customer.setName(fullName);
+
+
+
+
+        validateFullName(req, errors, customer);
+        validateImage(req, errors, customer);
+        validateTypeCustomer(req, errors, customer);
+        validateDateOfBirth(req, errors, customer);
+
+        String address = req.getParameter("txtAddress");
         customer.setAddress(address);
-        customer.setDateOfBirth(dateOfBirth);
-        customer.setIdType(idType);
 
-        customerService.addCustomer(customer);
 
-        req.setAttribute("message", "Insert customer success");
+
+        if (errors.size() != 0) {
+            req.setAttribute("errors", errors);
+            req.setAttribute("customer", customer);
+        }else{
+            customerService.addCustomer(customer);
+            req.setAttribute("message", "Insert customer success");
+        }
         RequestDispatcher requestDispatcher = req.getRequestDispatcher("/create.jsp");
         requestDispatcher.forward(req, resp);
     }
+
+    private void validateDateOfBirth(HttpServletRequest req, List<String> errors, Customer customer) {
+        String pattern = "yyyy-MM-dd";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+        Date dateOfBirth = null;
+        try {
+            dateOfBirth = simpleDateFormat.parse(req.getParameter("txtDateOfBirth"));
+            customer.setDateOfBirth(dateOfBirth);
+        } catch (ParseException e) {
+            errors.add("Ngày sinh không hợp lệ");
+            customer.setDateOfBirth(new Date());
+        }
+    }
+
+    private void validateTypeCustomer(HttpServletRequest req, List<String> errors, Customer customer) {
+        try {
+            int idType = Integer.parseInt(req.getParameter("txtIdType"));
+            //
+            if (idType > 2) {
+                errors.add("Kiểu khách hàng không hợp lệ");
+            }else{
+                customer.setIdType(idType);
+            }
+
+        } catch (NumberFormatException ex) {
+            errors.add("Kiểu khách hàng không hợp lệ");
+        }
+    }
+
+    private void validateImage(HttpServletRequest req, List<String> errors, Customer customer) {
+        String image = req.getParameter("txtImage");
+        if (image.equals("")) {
+            errors.add("Hình ảnh được rỗng");
+        }
+        customer.setImage(image);
+    }
+
+    private void validateFullName(HttpServletRequest req, List<String> errors, Customer customer) {
+        String fullName = req.getParameter("txtFullName");
+        if (!ValidateUtils.isFulllNameValid(fullName)) {
+            errors.add("FullName phải là kí tự và có từ 8-20 kí tự");
+        }
+        customer.setName(fullName);
+    }
+
 }
