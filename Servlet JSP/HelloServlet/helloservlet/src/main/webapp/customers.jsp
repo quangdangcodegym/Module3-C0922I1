@@ -1,4 +1,4 @@
-<%@ page import="com.codegym.Customer" %>
+<%@ page import="com.codegym.model.Customer" %>
 <%@ page import="java.util.List" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix = "fmt" uri = "http://java.sun.com/jsp/jstl/fmt" %>

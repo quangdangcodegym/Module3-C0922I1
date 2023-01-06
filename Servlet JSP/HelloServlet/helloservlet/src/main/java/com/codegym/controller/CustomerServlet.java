@@ -1,4 +1,9 @@
-package com.codegym;
+package com.codegym.controller;
+
+import com.codegym.model.Customer;
+import com.codegym.service.CustomerServiceImpl;
+import com.codegym.service.ICustomerService;
+import com.codegym.utils.ValidateUtils;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -7,22 +12,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.SimpleFormatter;
 
 @WebServlet(name = "CustomerServlet", urlPatterns = "/customers")
 public class CustomerServlet extends HttpServlet {
 
-    private CustomerService customerService;
+    private ICustomerService customerService;
 
     @Override
     public void init() throws ServletException {
-        customerService = new CustomerService();
+        customerService = new CustomerServiceImpl();
     }
 
     @Override

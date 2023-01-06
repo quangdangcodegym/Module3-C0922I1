@@ -1,4 +1,4 @@
-package com.codegym;
+package com.codegym.utils;
 
 import java.util.regex.Pattern;
 

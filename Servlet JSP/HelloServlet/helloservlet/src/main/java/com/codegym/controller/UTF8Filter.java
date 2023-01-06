@@ -1,4 +1,4 @@
-package com.codegym;
+package com.codegym.controller;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

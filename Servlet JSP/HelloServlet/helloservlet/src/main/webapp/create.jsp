@@ -109,10 +109,10 @@
                         </div>
                     </c:if>
 
-<%--                    <h1>${requestScope.errors}</h1>--%>
-<%--                    <h1>${requestScope.errors.toString()}</h1>--%>
-<%--                    <h1>${requestScope.errors.size()}</h1>--%>
-<%--                    <h1>${requestScope.errors.isEmpty()}</h1>--%>
+                    <h1>${requestScope.errors}</h1>
+                    <h1>${requestScope.errors.toString()}</h1>
+                    <h1>${requestScope.errors.size()}</h1>
+                    <h1>${requestScope.errors.isEmpty()}</h1>
 
 <%--                    <c:if test="${requestScope.errors.isEmpty() == false} ">--%>
                     <c:if test="${requestScope.errors.isEmpty() == false}">
