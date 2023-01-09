@@ -10,6 +10,7 @@ public class Product {
     private String description;
     private int idCategory;
 
+
     public Product() {
 
     }

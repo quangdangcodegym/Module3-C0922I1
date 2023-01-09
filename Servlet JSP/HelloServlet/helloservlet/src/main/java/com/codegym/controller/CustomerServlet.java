@@ -1,8 +1,8 @@
 package com.codegym.controller;
 
 import com.codegym.model.Customer;
-import com.codegym.service.CustomerServiceImpl;
-import com.codegym.service.ICustomerService;
+import com.codegym.model.CustomerType;
+import com.codegym.service.*;
 import com.codegym.utils.ValidateUtils;
 
 import javax.servlet.RequestDispatcher;
@@ -11,6 +11,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,10 +23,17 @@ import java.util.List;
 public class CustomerServlet extends HttpServlet {
 
     private ICustomerService customerService;
+    private ICustomerTypeService customerTypeService;
 
     @Override
     public void init() throws ServletException {
-        customerService = new CustomerServiceImpl();
+        customerService = new CustomerServiceAdvanced();
+        customerTypeService = new CustomerTypeImpl();
+
+        List<CustomerType> customerTypes = customerTypeService.getAllCustomerType();
+        if (getServletContext().getAttribute("listCustomerType") == null) {
+            getServletContext().setAttribute("listCustomerType", customerTypes);
+        }
     }
 
     @Override
@@ -53,7 +61,7 @@ public class CustomerServlet extends HttpServlet {
         Customer customer = customerService.findById(id);
 
         req.setAttribute("customer", customer);
-        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/edit.jsp");
+        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/dashboard/customer/edit.jsp");
         requestDispatcher.forward(req, resp);
 
     }
@@ -61,12 +69,18 @@ public class CustomerServlet extends HttpServlet {
     private void showCustomers(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         List<Customer> customers = customerService.getAllCustomers();
         req.setAttribute("listCustomers", customers);
-        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/customers.jsp");
+        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/dashboard/customer//customers.jsp");
         requestDispatcher.forward(req, resp);
     }
 
     private void showCreateCustomer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/create.jsp");
+        HttpSession httpSession = req.getSession();
+        System.out.println(httpSession.getId());
+        httpSession.setAttribute("testSession", "testSession.....");
+
+
+
+        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/dashboard/customer/create.jsp");
         requestDispatcher.forward(req, resp);
     }
 
@@ -133,7 +147,7 @@ public class CustomerServlet extends HttpServlet {
         customerService.updateCustomer(id, customer);
 
         req.setAttribute("message", "Edit success.......");
-        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/edit.jsp");
+        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/dashboard/customer/edit.jsp");
         requestDispatcher.forward(req, resp);
 
     }
@@ -162,7 +176,7 @@ public class CustomerServlet extends HttpServlet {
             customerService.addCustomer(customer);
             req.setAttribute("message", "Insert customer success");
         }
-        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/create.jsp");
+        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/dashboard/customer/create.jsp");
         requestDispatcher.forward(req, resp);
     }
 
