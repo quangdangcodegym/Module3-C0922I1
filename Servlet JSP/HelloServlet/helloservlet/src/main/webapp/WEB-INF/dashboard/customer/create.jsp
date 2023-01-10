@@ -59,6 +59,17 @@
                                             </ul>
                                         </div>
                                     </c:if>
+
+                                    <div class="toast" data-autohide="true" style="position: fixed; top: 10px; right: 10px; z-index: 100000">
+                                        <div class="toast-header">
+                                            <strong class="mr-auto text-primary">Edit customer</strong>
+                                            <small class="text-muted">5 mins ago</small>
+                                            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
+                                        </div>
+                                        <div class="toast-body">
+                                            Edit success....ahii
+                                        </div>
+                                    </div>
                                     <div class="form-group row">
                                         <label class="col-2">Fullname</label>
                                         <div class="col-10">
@@ -118,6 +129,7 @@
                 <jsp:include page="/WEB-INF/dashboard/layout/footer.jsp"></jsp:include>
                 <!-- end Footer -->
 
+
             </div>
 
             <!-- ============================================================== -->
@@ -134,7 +146,17 @@
             <jsp:param name="page" value="create"/>
         </jsp:include>
 
+    <c:if test="${requestScope.message!=null}">
+        <script>
+            window.onload = ()=>{
+                let message = '<%= request.getAttribute("message")%>';
+                document.querySelector(".toast-body").innerText = message;
 
+                $('.toast').toast({delay: 5000});
+                $('.toast').toast('show');
+            }
+        </script>
+    </c:if>
     </body>
 
 </html>

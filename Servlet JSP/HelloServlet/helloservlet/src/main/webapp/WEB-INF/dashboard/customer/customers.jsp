@@ -46,7 +46,24 @@
                         </div>
                         <!-- end page title -->
 
-                        <div class="row">
+                        <div class="row justify-content-end">
+                            <div>
+                                <form method="get" action="/customers">
+                                    <input type="hidden" name="action" value="search">
+                                    <div class="input-group rounded">
+                                        <input value="${requestScope.kw}" name="kw" type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+                                        <select name="idSlCustomerType">
+                                            <option value="-1">All</option>
+                                            <c:forEach items="${applicationScope.listCustomerType}" var="cType">
+                                                <option value="${cType.getId()}"
+                                                        <c:if test="${requestScope.idSlCustomerType == cType.getId()}">selected</c:if>
+                                                >${cType.getName()}</option>
+                                            </c:forEach>
+                                        </select>
+                                        <input type="submit" class="btn btn-primary" value="Search">
+                                    </div>
+                                </form>
+                            </div>
                             <table class="table table-striped ">
                                 <thead class="thead-dark">
                                 <tr>
@@ -54,8 +71,8 @@
                                     <th>FullName</th>
                                     <th>Date of birth</th>
                                     <th>Address</th>
-                                    <th>Image</th>
                                     <th>Type Customer</th>
+                                    <th>Image</th>
                                     <th>Action</th>
                                 </tr>
                                 </thead>
@@ -65,7 +82,14 @@
                                     <td>${customer.getName()}</td>
                                     <td>${customer.getAddress()}</td>
                                     <td><img width="100px" height="100px" src="${customer.getImage()}" /></td>
-                                    <td>${customer.getIdType()}</td>
+                                    <td>
+                                            <c:forEach items="${applicationScope.listCustomerType}" var="cType">
+                                                <c:if test="${cType.getId() == customer.getIdType()}">
+                                                    ${cType.getName()}
+                                                </c:if>
+                                            </c:forEach>
+
+                                    </td>
                                     <td><fmt:formatDate pattern = "yyyy-MM-dd"
                                                         value = "${customer.getDateOfBirth()}" /></td>
 
@@ -76,6 +100,33 @@
                                     </tr>
                                 </c:forEach>
                             </table>
+
+                            <ul class="pagination pagination-split float-right mb-0">
+                                <c:if test="${currentPage != 1}">
+                                    <li class="page-item">
+                                        <a href="/customers?action=search&kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${currentPage-1}" class="page-link"><i class="fa fa-angle-left"></i></a>
+                                    </li>
+                                </c:if>
+                                <c:forEach begin="1" end="${noOfPages}" var="i">
+                                    <c:choose>
+                                        <c:when test="${currentPage eq i}">
+                                            <li class="page-item active">
+                                                <a href="/customers?action=search&kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${i}" class="page-link">${i}</a>
+                                            </li>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <li class="page-item">
+                                                <a href="/customers?action=search&kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${i}" class="page-link">${i}</a>
+                                            </li>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+                                <c:if test="${currentPage lt noOfPages}">
+                                    <li class="page-item">
+                                        <a href="/customers?action=search&kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${currentPage+1}" class="page-link"><i class="fa fa-angle-right"></i></a>
+                                    </li>
+                                </c:if>
+                            </ul>
                             <!-- end col -->
                         </div>
                         <!-- end row -->

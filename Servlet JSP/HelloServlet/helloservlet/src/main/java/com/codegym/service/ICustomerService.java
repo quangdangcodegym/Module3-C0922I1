@@ -12,4 +12,9 @@ public interface ICustomerService {
     void deleteCustomerById(long id);
     void addCustomer(Customer customer);
 
+    public void addCustomerBySP(Customer customer);
+
+    List<Customer> searchCustomerByKwAndCustomerType(String kw, int idCustomerType, int offset, int numberOfPage);
+
+    public int getNoOfRecords();
 }

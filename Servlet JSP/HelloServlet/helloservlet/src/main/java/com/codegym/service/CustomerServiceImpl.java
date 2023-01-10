@@ -4,6 +4,7 @@ import com.codegym.model.Customer;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class CustomerServiceImpl implements ICustomerService {
@@ -11,10 +12,12 @@ public class CustomerServiceImpl implements ICustomerService {
     private static final String SELECT_CUSTOMER_BY_ID = "SELECT * FROM customer where id = ?;";
     private static final String UPDATE_CUSTOMER_BY_ID = "update customer set name = ?,dateofbirth = ?, address = ?, image = ? , id_type = ? where id =?";
     private static final String ADD_CUSTOMER = "INSERT INTO `customer` (`name`, `dateofbirth`, `address`, `id_type`, `image`) VALUES (?, ?, ?, ?, ?);";
+    private static final String SP_INSERT_CUSTOMER = "call spInsertCustomer(?,?, ?, ?, ?, ?);";
     protected String jdbcURL = "jdbc:mysql://localhost:3306/c9_customermanager";
     protected String jdbcUsername = "root";
     protected String jdbcPassword = "St180729!!";
 
+    private int noOfRecords;
 
     public Connection getConnection() {
         Connection connection = null;
@@ -39,6 +42,7 @@ public class CustomerServiceImpl implements ICustomerService {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_CUSTOMER);
             ResultSet  rs = preparedStatement.executeQuery();
+
 
             while (rs.next()) {
                 Customer customer = getCustomerFromRs(rs);
@@ -163,5 +167,79 @@ public class CustomerServiceImpl implements ICustomerService {
         } catch (SQLException e) {
             printSQLException(e);
         }
+    }
+
+    public void addCustomerBySP(Customer customer) {
+
+        // "INSERT INTO `customer` (`name`, `dateofbirth`, `address`, `id_type`, `image`)
+        // VALUES ( ?, ?, ?, ?, ?);";
+        try {
+            Connection connection = getConnection();
+
+
+            //call spInsertCustomer(?,?, ?, ?, ?, ?);
+            CallableStatement callableStatement = connection.prepareCall(SP_INSERT_CUSTOMER);
+            callableStatement.setString(1, customer.getName());
+            callableStatement.setDate(2, new java.sql.Date(customer.getDateOfBirth().getTime()));
+            callableStatement.setString(3, customer.getAddress());
+            callableStatement.setString(4, customer.getImage());
+            callableStatement.setInt(5, customer.getIdType());
+
+            callableStatement.registerOutParameter(6, Types.VARCHAR);
+
+
+            System.out.println("addCustomer SP: " + callableStatement);
+            callableStatement.executeUpdate();
+            String message = callableStatement.getString(6);
+            System.out.println("Mesage: " + message);
+        } catch (SQLException e) {
+            printSQLException(e);
+        }
+    }
+
+    @Override
+    public List<Customer> searchCustomerByKwAndCustomerType(String kw, int idCustomerType, int offset, int numberOfPage) {
+        String SEARCH_CUSTOMER_ALL = "SELECT SQL_CALC_FOUND_ROWS * FROM customer where name like ? limit ?,?";
+        String SEARCH_CUSTOMER_FILTER = "SELECT SQL_CALC_FOUND_ROWS * FROM customer where name like ? and id_type= ? limit ?, ?";
+        PreparedStatement preparedStatement;
+        List<Customer> customers = new ArrayList<>();
+        try {
+            Connection connection = getConnection();
+            if (idCustomerType == -1) {
+                preparedStatement = connection.prepareStatement(SEARCH_CUSTOMER_ALL);
+                preparedStatement.setString(1, "%" + kw + "%");
+                preparedStatement.setInt(2, offset);
+                preparedStatement.setInt(3, numberOfPage);
+            }else{
+                preparedStatement = connection.prepareStatement(SEARCH_CUSTOMER_FILTER);
+                preparedStatement.setString(1, "%" + kw + "%");
+                preparedStatement.setInt(2, idCustomerType);
+                preparedStatement.setInt(3, offset);
+                preparedStatement.setInt(4, numberOfPage);
+            }
+            System.out.println("Pagging " + preparedStatement);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                Customer customer = getCustomerFromRs(rs);
+                customers.add(customer);
+            }
+
+            System.out.println("Pagging get total row: " + preparedStatement);
+            rs = preparedStatement.executeQuery("SELECT FOUND_ROWS()");
+            while (rs.next()) {
+                noOfRecords = rs.getInt(1);
+            }
+            connection.close();
+
+            return customers;
+
+        } catch (SQLException sqlException) {
+            printSQLException(sqlException);
+        }
+
+        return null;
+    }
+    public int getNoOfRecords(){
+        return noOfRecords;
     }
 }

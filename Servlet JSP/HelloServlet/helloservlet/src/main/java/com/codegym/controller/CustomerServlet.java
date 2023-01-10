@@ -27,7 +27,7 @@ public class CustomerServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        customerService = new CustomerServiceAdvanced();
+        customerService = new CustomerServiceImpl();
         customerTypeService = new CustomerTypeImpl();
 
         List<CustomerType> customerTypes = customerTypeService.getAllCustomerType();
@@ -49,10 +49,46 @@ public class CustomerServlet extends HttpServlet {
             case "edit":
                 showEditCustomer(req, resp);
                 break;
-
+            case "search":
+                showSearchCustomers(req, resp);
+                break;
             default:
                 showCustomers(req, resp);
         }
+
+    }
+
+    private void showSearchCustomers(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        int limit = 3;
+        String kw = "";
+        int customerType = -1;
+        int page = 1;
+        if (req.getParameter("page") != null) {
+            page = Integer.parseInt(req.getParameter("page"));
+        }
+        if (req.getParameter("kw") != null) {
+            kw = req.getParameter("kw");
+        }
+        if(req.getParameter("idSlCustomerType")!=null){
+            customerType = Integer.parseInt(req.getParameter("idSlCustomerType"));
+        }
+        if (req.getParameter("limit") != null) {
+            limit = Integer.parseInt(req.getParameter("limit"));
+        }
+        List<Customer> searchCustomers =
+                customerService.searchCustomerByKwAndCustomerType(kw, customerType, (page - 1) * limit, limit);
+
+        int noOfRecords = customerService.getNoOfRecords();
+        int noOfPages = (int) Math.ceil(noOfRecords * 1.0 / limit);
+
+
+        req.setAttribute("noOfPages", noOfPages);
+        req.setAttribute("currentPage", page);
+        req.setAttribute("kw", kw);
+        req.setAttribute("idSlCustomerType", customerType);
+        req.setAttribute("listCustomers", searchCustomers);
+        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/dashboard/customer//customers.jsp");
+        requestDispatcher.forward(req, resp);
 
     }
 
@@ -158,7 +194,6 @@ public class CustomerServlet extends HttpServlet {
 
 
 
-
         validateFullName(req, errors, customer);
         validateImage(req, errors, customer);
         validateTypeCustomer(req, errors, customer);
@@ -167,13 +202,11 @@ public class CustomerServlet extends HttpServlet {
         String address = req.getParameter("txtAddress");
         customer.setAddress(address);
 
-
-
         if (errors.size() != 0) {
             req.setAttribute("errors", errors);
             req.setAttribute("customer", customer);
         }else{
-            customerService.addCustomer(customer);
+            customerService.addCustomerBySP(customer);
             req.setAttribute("message", "Insert customer success");
         }
         RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/dashboard/customer/create.jsp");

@@ -34,4 +34,19 @@ public class CustomerServiceAdvanced implements ICustomerService{
     public void addCustomer(Customer customer) {
         customerRepository.add(customer);
     }
+
+    @Override
+    public void addCustomerBySP(Customer customer) {
+
+    }
+
+    @Override
+    public List<Customer> searchCustomerByKwAndCustomerType(String kw, int idCustomerType, int offset, int numberOfPage) {
+        return null;
+    }
+
+    @Override
+    public int getNoOfRecords() {
+        return 0;
+    }
 }
