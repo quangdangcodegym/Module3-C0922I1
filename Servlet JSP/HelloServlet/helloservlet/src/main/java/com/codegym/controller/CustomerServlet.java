@@ -24,6 +24,8 @@ public class CustomerServlet extends HttpServlet {
 
     private ICustomerService customerService;
     private ICustomerTypeService customerTypeService;
+    private int limit = 3;
+
 
     @Override
     public void init() throws ServletException {
@@ -49,17 +51,14 @@ public class CustomerServlet extends HttpServlet {
             case "edit":
                 showEditCustomer(req, resp);
                 break;
-            case "search":
-                showSearchCustomers(req, resp);
-                break;
             default:
-                showCustomers(req, resp);
+                showSearchCustomers(req, resp);
         }
 
     }
 
     private void showSearchCustomers(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        int limit = 3;
+
         String kw = "";
         int customerType = -1;
         int page = 1;
@@ -87,7 +86,7 @@ public class CustomerServlet extends HttpServlet {
         req.setAttribute("kw", kw);
         req.setAttribute("idSlCustomerType", customerType);
         req.setAttribute("listCustomers", searchCustomers);
-        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/dashboard/customer//customers.jsp");
+        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/dashboard/customer/customers.jsp");
         requestDispatcher.forward(req, resp);
 
     }
@@ -102,12 +101,7 @@ public class CustomerServlet extends HttpServlet {
 
     }
 
-    private void showCustomers(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        List<Customer> customers = customerService.getAllCustomers();
-        req.setAttribute("listCustomers", customers);
-        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/dashboard/customer//customers.jsp");
-        requestDispatcher.forward(req, resp);
-    }
+
 
     private void showCreateCustomer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession httpSession = req.getSession();
@@ -142,18 +136,49 @@ public class CustomerServlet extends HttpServlet {
     }
 
     private void deleteCustomer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String kw = "";
+
+        if (req.getParameter("kw") != null) {
+            kw = req.getParameter("kw");
+        }
+        int noOfpages = 1;
+        if (req.getParameter("noOfPages") != null) {
+            noOfpages = Integer.parseInt(req.getParameter("noOfPages"));
+        }
+        int idTypeCustomer = Integer.parseInt(req.getParameter("customerType"));
+        int page = Integer.parseInt(req.getParameter("currentPage"));
+
+        req.setAttribute("currentPage", page);
+        req.setAttribute("idSlCustomerType",idTypeCustomer);
         long id = Long.parseLong(req.getParameter("idFrmDeleteConfirm"));
+
+        List<Customer> endCustomers = customerService.searchCustomerByKwAndCustomerType(kw, idTypeCustomer, (noOfpages - 1) * limit, limit);
+        if (endCustomers.size() == 1) {
+            page = page-1;
+            if (page == 0) {
+                page = 1;
+            }
+            noOfpages = noOfpages-1;
+            req.setAttribute("currentPage", page);
+            req.setAttribute("noOfPages", noOfpages);
+        }else{
+            req.setAttribute("currentPage", page);
+            req.setAttribute("noOfPages", noOfpages);
+        }
+
+        req.setAttribute("kw", kw);
+        req.setAttribute("idSlCustomerType", idTypeCustomer);
         Customer customer = customerService.findById(id);
         if (customer != null) {
             // Xóa
             customerService.deleteCustomerById(id);
-            req.setAttribute("message", "Delete success!");
         }else{
             req.setAttribute("message", "Customer not exists");
         }
-
-        showCustomers(req, resp);
-
+        List<Customer> pageCustomers = customerService.searchCustomerByKwAndCustomerType(kw, idTypeCustomer, (page - 1) * limit, limit);
+        req.setAttribute("listCustomers", pageCustomers);
+        RequestDispatcher requestDispatcher = req.getRequestDispatcher("/WEB-INF/dashboard/customer/customers.jsp");
+        requestDispatcher.forward(req, resp);
     }
 
     private void editCustomer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

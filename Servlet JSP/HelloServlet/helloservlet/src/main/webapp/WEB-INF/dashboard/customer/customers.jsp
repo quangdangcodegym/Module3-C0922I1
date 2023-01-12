@@ -5,7 +5,7 @@
 
     <head>
         <meta charset="utf-8">
-        <title>Basic Tables | Zircos - Responsive Bootstrap 4 Admin Dashboard</title>
+        <title>Danh sách</title>
         <jsp:include page="/WEB-INF/dashboard/layout/css_head.jsp"></jsp:include>
 
     </head>
@@ -40,7 +40,7 @@
                                             <li class="breadcrumb-item active">Basic Tables</li>
                                         </ol>
                                     </div>
-                                    <h4 class="page-title">Basic Tables</h4>
+                                    <h4 class="page-title">Dánh sách customer</h4>
                                 </div>
                             </div>
                         </div>
@@ -48,10 +48,37 @@
 
                         <div class="row justify-content-end">
                             <div>
+                                <div id="frmDeleteConfirm" class="modal fade" role="dialog">
+                                    <div class="modal-dialog">
+
+                                        <!-- Modal content-->
+                                        <div class="modal-content">
+                                            <form action="/customers?action=delete" method="post" id="frmDelete">
+                                                <div class="modal-header">
+                                                    <h4 class="modal-title">Confirm Delete</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <input type="hidden" id="idFrmDeleteConfirm" name="idFrmDeleteConfirm"  />
+                                                    <input type="hidden" name="kw" value="${requestScope.kw}">
+                                                    <input type="hidden" name="currentPage" value="${requestScope.currentPage}">
+                                                    <input type="hidden" name="customerType" value="${requestScope.idSlCustomerType}">
+                                                    <input type="hidden" name="noOfPages" value="${requestScope.noOfPages}">
+
+                                                    <p id="nameFrmDeleteConfirm">Name....?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-primary" data-dismiss="modal" onclick="handleDeleteCustomer()">Delete</button>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                </div>
                                 <form method="get" action="/customers">
-                                    <input type="hidden" name="action" value="search">
                                     <div class="input-group rounded">
                                         <input value="${requestScope.kw}" name="kw" type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+
                                         <select name="idSlCustomerType">
                                             <option value="-1">All</option>
                                             <c:forEach items="${applicationScope.listCustomerType}" var="cType">
@@ -69,10 +96,10 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>FullName</th>
-                                    <th>Date of birth</th>
                                     <th>Address</th>
-                                    <th>Type Customer</th>
                                     <th>Image</th>
+                                    <th>Type customer</th>
+                                    <th>Date of birth</th>
                                     <th>Action</th>
                                 </tr>
                                 </thead>
@@ -104,26 +131,26 @@
                             <ul class="pagination pagination-split float-right mb-0">
                                 <c:if test="${currentPage != 1}">
                                     <li class="page-item">
-                                        <a href="/customers?action=search&kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${currentPage-1}" class="page-link"><i class="fa fa-angle-left"></i></a>
+                                        <a href="/customers?kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${currentPage-1}" class="page-link"><i class="fa fa-angle-left"></i></a>
                                     </li>
                                 </c:if>
                                 <c:forEach begin="1" end="${noOfPages}" var="i">
                                     <c:choose>
                                         <c:when test="${currentPage eq i}">
                                             <li class="page-item active">
-                                                <a href="/customers?action=search&kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${i}" class="page-link">${i}</a>
+                                                <a href="/customers?kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${i}" class="page-link">${i}</a>
                                             </li>
                                         </c:when>
                                         <c:otherwise>
                                             <li class="page-item">
-                                                <a href="/customers?action=search&kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${i}" class="page-link">${i}</a>
+                                                <a href="/customers?kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${i}" class="page-link">${i}</a>
                                             </li>
                                         </c:otherwise>
                                     </c:choose>
                                 </c:forEach>
                                 <c:if test="${currentPage lt noOfPages}">
                                     <li class="page-item">
-                                        <a href="/customers?action=search&kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${currentPage+1}" class="page-link"><i class="fa fa-angle-right"></i></a>
+                                        <a href="/customers?kw=${requestScope.kw}&idSlCustomerType=${requestScope.idSlCustomerType}&page=${currentPage+1}" class="page-link"><i class="fa fa-angle-right"></i></a>
                                     </li>
                                 </c:if>
                             </ul>
@@ -159,5 +186,26 @@
         </jsp:include>
 
     </body>
+    <script>
+        window.onload = ()=>{
+            let items = document.querySelectorAll("[id*=deleteId]");
+            console.log(items);
+            items.forEach((item)=>{
+                item.addEventListener("click", (event)=>{
+                    let id = event.target.parentElement.getAttribute('data-id');
+                    let name = event.target.parentElement.getAttribute('data-name');
+                    // let strId = event.target.parentElement.id;
+                    document.getElementById("idFrmDeleteConfirm").value = id;
+                    document.getElementById("nameFrmDeleteConfirm").innerText = name;
 
+                    $("#frmDeleteConfirm").modal();
+
+                });
+            })
+        }
+
+        function handleDeleteCustomer(){
+            document.getElementById("frmDelete").submit();
+        }
+    </script>
 </html>
